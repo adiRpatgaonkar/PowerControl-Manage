@@ -1,6 +1,6 @@
 
 int ldrIn1 = A0, ldrIn2 = A1, r = A3; // LDR detector pins (Laser pins)
-int relayPins[] = {11, 12, 13}, relayStates[] = {0, 0, 0}, noOfRelays = 3;
+int relayPins[] = {10, 11, 12, 13}, relayStates[] = {0, 0, 0, 0}, noOfRelays = 4;
 void setup() {
   // INPUT mode for LDR since we are "detecting"
   for (int i = 0; i < noOfRelays; i++)
@@ -12,7 +12,7 @@ void setup() {
   pinMode(r, INPUT); // For randomSeed
   Serial.begin(9600); // DEBUGGING
 }
-double x = 0.0, y = 0.0, inCount = 0.0, outCount = 0.0, capacity = 6.0, count = 0; 
+double x = 0.0, y = 0.0, inCount = 0.0, outCount = 0.0, capacity = 8.0, count = 0; 
 int devices = 0, devices1 = 0, thresh = 1000, flag = 0, anomaly = 0, change = 0, m;
 // LDR1 value, LDR2 value, folks coming in, folks going out, uncertain condtions in the system, room capacity(NOT USED YET)
 void loop() {
@@ -78,7 +78,12 @@ void loop() {
   if (inCount == outCount)
   {
     for (int i = 0; i < noOfRelays; i++)
-      digitalWrite(relayPins[i], LOW);
+    {
+      if (i == 0)
+        digitalWrite(relayPins[i], HIGH);
+      else
+        digitalWrite(relayPins[i], LOW);
+    }  
   }
   else if (inCount > outCount)
   {
@@ -124,13 +129,21 @@ void loop() {
         do
         {
           z = random() % noOfRelays;
-          //Serial.print("z = ");
-          //Serial.println(z);
-          //delay(1000);
+          Serial.print("z = ");
+          Serial.println(z);
+          delay(1000);
         }
         while (relayStates[z] == j);  
         relayStates[z] = j;
-        digitalWrite(relayPins[z], j);
+        if (z == 0)
+        {
+          if (j)
+            digitalWrite(relayPins[z], LOW);
+          else
+            digitalWrite(relayPins[z], HIGH);
+        } 
+        else
+          digitalWrite(relayPins[z], j);
         if (j)
           count++;
         else
@@ -138,7 +151,7 @@ void loop() {
         if (count > noOfRelays) break;
         Serial.println(count);  
         
-      }  
+      }
     }
     
   }
